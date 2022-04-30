@@ -3,20 +3,54 @@
 <head></head>
 <body>
   
-  <div id="grid" style="height:800px; width:100%"></div>
+  <div id="grid" style="height:1000px; width:100%"></div>
 
   <script src="honeycomb.min.js"></script>
   <script src="svg.min.js"></script>
   
   <script>
-    const center = {
-      q: 0,
-      r: 0,
-      s: 0,
+    generateGrid(28, 0.8);
+
+    function generateGrid(tileCount, tileProbability) {
+      // Initialize board with moon tiles
+      const tiles = [{
+        q: 0,
+        r: 0,
+        s: 0,
+        type: 'moon',
+      }];
+
+      tiles.push(...ring(1).map(tile => {
+        tile.type = 'moon';
+
+        return tile;
+      }));
+
+      // Extend board randomly
+      let tilesUsed = 0;
+      const availableTiles = getAvailableTiles();
+
+      while(tilesUsed < tileCount) {
+        for (let r = 2; r <= 8; r++){
+          ring(r).forEach(tile => {
+            if (tilesUsed < tileCount && isContiguous(tile, tiles) && Math.random() < tileProbability){
+              tilesUsed++;
+              const properties = availableTiles.pop();
+  
+              tile.type = properties.type;
+              tile.blockades = properties.blockades;
+              tile.icon = properties.icon;
+              tiles.push(tile);
+            }
+          })
+        }
+      }
+      
+      // Render board
+      renderGrid(tiles);
     }
 
-    renderGrid(ring(2));
-
+    // Get the set of tiles exactly `radius` distance away from the center
     function ring(radius) {
       const tiles = [];
       for (let q = -radius; q <= radius; q++){
@@ -36,6 +70,12 @@
       return tiles;
     }
 
+    // Is the tile contiguous to the board?
+    function isContiguous(tile, tileList) {
+      return neighbors(tile).filter(neighbor => tileList.filter(x => tileEquals(x, neighbor)).length > 0).length > 0;
+    }
+
+    // Get the set of neighbor coordinates for a tile
     function neighbors(tile) {
       return [
         shift(tile,  1, -1,  0),
@@ -47,6 +87,7 @@
       ];
     }
 
+    // Shift the coordinates of a tile
     function shift(tile, q, r, s) {
       return {
         q: tile.q + q,
@@ -55,14 +96,26 @@
       };
     }
 
+    // Equality by coordinates
+    function tileEquals(a, b) {
+      return a.q == b.q && a.r == b.r && a.s == b.s;
+    }
+
+    // Render using svg.js
     function renderGrid(tiles) {
+      const iconSize = 40;
+      const hexSize = 50;
+
+      // Initialize canvas
       const draw = SVG().addTo('#grid').size('100%', '100%');
       const canvasWidth = draw.node.clientWidth;
       const canvasHeight = draw.node.clientHeight;
 
-      const Hex = Honeycomb.extendHex({ size: 50 });
+      // Initialize grid
+      const Hex = Honeycomb.extendHex({ size: hexSize });
       const Grid = Honeycomb.defineGrid(Hex);    
       
+      // Prepare symbols for svg
       const corners = Hex().corners();
       const blockadePivot = Hex().center();
       const blockadeCorners = [
@@ -82,22 +135,95 @@
       
       const hexSymbol = draw.symbol()
         .polygon(corners.map(({ x, y }) => `${x},${y}`).join(' '))
-        .fill('none')
         .stroke({ width: 1, color: '#000' })
         .translate(canvasWidth/2, canvasHeight/2);
 
+      const icons = {
+        radioactive: draw.symbol().image('icons/radioactive.png').translate(canvasWidth/2, canvasHeight/2).size(iconSize, iconSize),
+        unstable: draw.symbol().image('icons/unstable.png').translate(canvasWidth/2, canvasHeight/2).size(iconSize, iconSize),
+        tsukuyumi: draw.symbol().image('icons/tsukuyumi.png').translate(canvasWidth/2, canvasHeight/2).size(iconSize, iconSize),
+        toxic: draw.symbol().image('icons/toxic.png').translate(canvasWidth/2, canvasHeight/2).size(iconSize, iconSize),
+      };
+
+      // Draw tiles
       Grid(tiles).forEach(hex => {
           const { x, y } = hex.toPoint()
 
-          draw.use(hexSymbol).translate(x, y);
-          draw.use(blockades[0]).translate(x, y);
+          draw.use(hexSymbol).translate(x, y).fill(getFillColor(hex.type));
+          if (hex.blockades) {
+            const rotation = Math.floor(Math.random()*6);
+            hex.blockades.forEach(i => draw.use(blockades[(i + rotation) % 6]).translate(x, y))
+          }
+
+          if (hex.icon) {
+            draw.use(icons[hex.icon]).translate(x + hex.width()/2 - iconSize/2, y + hex.height()/2 - iconSize/2);
+          }
       });
+
+      function getFillColor(type) {
+        const colors = {
+          blank: '#e0e0e0',
+          moon: '#bf0080',
+          fertile: '#00ba5d',
+          mountain: '#888',
+          riverlands: '#82e2ed',
+        }; 
+
+        return colors[type];
+      }
 
       function intermediatePoint(source, dest, t) {
         return {
           x: source.x * (1-t) + dest.x * t,
           y: source.y * (1-t) + dest.y * t,
         };
+      }
+    }
+
+    // List of available tiles taken from the game
+    function getAvailableTiles() {
+      const tiles = [];
+
+      addTile(9, 'blank', []);
+      addTile(8, 'blank', [0]);
+      addTile(3, 'blank', [0,2]);
+      addTile(1, 'blank', [0,3]);
+      addTile(4, 'blank', [0,1,3]);
+      addTile(1, 'blank', [], 'radioactive');
+      addTile(1, 'blank', [0], 'radioactive');
+      addTile(1, 'blank', [0,2], 'radioactive');
+      addTile(3, 'blank', [], 'unstable');
+      addTile(1, 'blank', [0], 'unstable');
+      addTile(2, 'blank', [], 'tsukuyumi');
+      addTile(2, 'blank', [], 'toxic');
+      addTile(1, 'blank', [0,1], 'toxic');
+      addTile(1, 'fertile', []);
+      addTile(2, 'fertile', [0]);
+      addTile(1, 'fertile', [0,2]);
+      addTile(1, 'fertile', [0,3]);
+      addTile(2, 'mountain', []);
+      addTile(2, 'mountain', [0]);
+      addTile(1, 'mountain', [0,3]);
+      addTile(4, 'riverlands', [0,3]);
+
+      shuffleArray(tiles);
+      return tiles;
+      
+      function addTile(qty, type, blockades, icon = null){
+        for (let i = 0; i < qty; i++){
+          tiles.push({
+            type: type,
+            blockades: blockades,
+            icon: icon,
+          });
+        }
+      }
+    }
+
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
       }
     }
     
