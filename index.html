@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head></head>
+<body>
+  
+  <div id="grid" style="height:800px; width:100%"></div>
+
+  <script src="honeycomb.min.js"></script>
+  <script src="svg.min.js"></script>
+  
+  <script>
+    const center = {
+      q: 0,
+      r: 0,
+      s: 0,
+    }
+
+    renderGrid(ring(2));
+
+    function ring(radius) {
+      const tiles = [];
+      for (let q = -radius; q <= radius; q++){
+        for (let r = -radius; r <= radius; r++){
+          const s = -q - r;
+          
+          if (Math.max(Math.abs(q), Math.abs(r), Math.abs(s)) == radius){
+            tiles.push({
+              q: q,
+              r: r,
+              s: -q -r,
+            });
+          }
+        }
+      }
+
+      return tiles;
+    }
+
+    function neighbors(tile) {
+      return [
+        shift(tile,  1, -1,  0),
+        shift(tile, -1,  1,  0),
+        shift(tile,  0,  1, -1),
+        shift(tile,  0, -1,  1),
+        shift(tile, -1,  0,  1),
+        shift(tile,  1,  0, -1),
+      ];
+    }
+
+    function shift(tile, q, r, s) {
+      return {
+        q: tile.q + q,
+        r: tile.r + r,
+        s: tile.s + s,
+      };
+    }
+
+    function renderGrid(tiles) {
+      const draw = SVG().addTo('#grid').size('100%', '100%');
+      const canvasWidth = draw.node.clientWidth;
+      const canvasHeight = draw.node.clientHeight;
+
+      const Hex = Honeycomb.extendHex({ size: 50 });
+      const Grid = Honeycomb.defineGrid(Hex);    
+      
+      const corners = Hex().corners();
+      const blockadePivot = Hex().center();
+      const blockadeCorners = [
+        corners[0],
+        intermediatePoint(corners[0], blockadePivot, 0.2),
+        intermediatePoint(corners[1], blockadePivot, 0.2),
+        corners[1],
+      ];
+
+      const blockades = [0,1,2,3,4,5].map(i =>
+        draw.symbol()
+          .polygon(blockadeCorners.map(({ x, y }) => `${x},${y}`).join(' '))
+          .fill({color: '#c00', opacity: 0.8})
+          .rotate(60*i, blockadePivot.x, blockadePivot.y)
+          .translate(canvasWidth/2, canvasHeight/2)
+      );
+      
+      const hexSymbol = draw.symbol()
+        .polygon(corners.map(({ x, y }) => `${x},${y}`).join(' '))
+        .fill('none')
+        .stroke({ width: 1, color: '#000' })
+        .translate(canvasWidth/2, canvasHeight/2);
+
+      Grid(tiles).forEach(hex => {
+          const { x, y } = hex.toPoint()
+
+          draw.use(hexSymbol).translate(x, y);
+          draw.use(blockades[0]).translate(x, y);
+      });
+
+      function intermediatePoint(source, dest, t) {
+        return {
+          x: source.x * (1-t) + dest.x * t,
+          y: source.y * (1-t) + dest.y * t,
+        };
+      }
+    }
+    
+  </script>
+</body>
+</html>
