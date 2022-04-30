@@ -9,6 +9,7 @@
   <script src="svg.min.js"></script>
   
   <script>
+    // Sizes: 10, 21, 28, 35, 42
     generateGrid(28, 0.8);
 
     function generateGrid(tileCount, tileProbability) {
@@ -162,22 +163,20 @@
 
           if (hex.conquestValue) {
             const text = draw.text(hex.conquestValue)
-              // .height(iconSize)
-              // .width(iconSize)
               .font({
                 family: 'Helvetica',
                 size: 20,
                 weight: 'bold',
               });
 
-              text.move(x + hex.width()/2 - text.length()/2 + canvasWidth/2, y + hex.height()/2 - 10 + canvasHeight/2);
+              text.move(x + hex.width()/2 - text.length()/2 + canvasWidth/2, y + hex.height()/2 - 9 + canvasHeight/2);
           }
       });
 
       function getFillColor(type) {
         const colors = {
           blank: '#e0e0e0',
-          moon: '#bf0080',
+          moon: '#b53ab1',
           fertile: '#00ba5d',
           mountain: '#888',
           riverlands: '#82e2ed',
