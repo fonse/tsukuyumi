@@ -40,6 +40,7 @@
               tile.type = properties.type;
               tile.blockades = properties.blockades;
               tile.icon = properties.icon;
+              tile.conquestValue = properties.conquestValue;
               tiles.push(tile);
             }
           })
@@ -158,6 +159,19 @@
           if (hex.icon) {
             draw.use(icons[hex.icon]).translate(x + hex.width()/2 - iconSize/2, y + hex.height()/2 - iconSize/2);
           }
+
+          if (hex.conquestValue) {
+            const text = draw.text(hex.conquestValue)
+              // .height(iconSize)
+              // .width(iconSize)
+              .font({
+                family: 'Helvetica',
+                size: 20,
+                weight: 'bold',
+              });
+
+              text.move(x + hex.width()/2 - text.length()/2 + canvasWidth/2, y + hex.height()/2 - 10 + canvasHeight/2);
+          }
       });
 
       function getFillColor(type) {
@@ -201,20 +215,23 @@
       addTile(2, 'fertile', [0]);
       addTile(1, 'fertile', [0,2]);
       addTile(1, 'fertile', [0,3]);
-      addTile(2, 'mountain', []);
-      addTile(2, 'mountain', [0]);
-      addTile(1, 'mountain', [0,3]);
+      addTile(1, 'mountain', [], null, 15);
+      addTile(1, 'mountain', [], null, 20);
+      addTile(1, 'mountain', [0], null, 15);
+      addTile(1, 'mountain', [0], null, 20);
+      addTile(1, 'mountain', [0,3], null, 20);
       addTile(4, 'riverlands', [0,3]);
 
       shuffleArray(tiles);
       return tiles;
       
-      function addTile(qty, type, blockades, icon = null){
+      function addTile(qty, type, blockades, icon = null, conquestValue = 0){
         for (let i = 0; i < qty; i++){
           tiles.push({
             type: type,
             blockades: blockades,
             icon: icon,
+            conquestValue: conquestValue,
           });
         }
       }
