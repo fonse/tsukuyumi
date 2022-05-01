@@ -50,7 +50,7 @@
       </div>
     </form>
 
-    <div id="grid" class="row"></div>
+    <div id="grid" class="mx-auto"></div>
   </main>
 
   <script src="honeycomb.min.js"></script>
@@ -174,10 +174,7 @@
       // Initialize canvas
       const gridContainer = document.getElementById('grid');
       gridContainer.innerHTML = '';
-
       const draw = SVG().addTo('#grid').size('100%', '100%');
-      const canvasWidth = draw.node.clientWidth;
-      const canvasHeight = draw.node.clientHeight;
 
       // Initialize grid
       const Hex = Honeycomb.extendHex({ size: hexSize });
@@ -198,19 +195,17 @@
           .polygon(blockadeCorners.map(({ x, y }) => `${x},${y}`).join(' '))
           .fill({color: '#c00', opacity: 0.8})
           .rotate(60*i, blockadePivot.x, blockadePivot.y)
-          .translate(canvasWidth/2, canvasHeight/2)
       );
       
       const hexSymbol = draw.symbol()
         .polygon(corners.map(({ x, y }) => `${x},${y}`).join(' '))
-        .stroke({ width: 1, color: '#000' })
-        .translate(canvasWidth/2, canvasHeight/2);
+        .stroke({ width: 1, color: '#000' });
 
       const icons = {
-        radioactive: draw.symbol().image('icons/radioactive.png').translate(canvasWidth/2, canvasHeight/2).size(iconSize, iconSize),
-        unstable: draw.symbol().image('icons/unstable.png').translate(canvasWidth/2, canvasHeight/2).size(iconSize, iconSize),
-        tsukuyumi: draw.symbol().image('icons/tsukuyumi.png').translate(canvasWidth/2, canvasHeight/2).size(iconSize, iconSize),
-        toxic: draw.symbol().image('icons/toxic.png').translate(canvasWidth/2, canvasHeight/2).size(iconSize, iconSize),
+        radioactive: draw.symbol().image('icons/radioactive.png').size(iconSize, iconSize),
+        unstable: draw.symbol().image('icons/unstable.png').size(iconSize, iconSize),
+        tsukuyumi: draw.symbol().image('icons/tsukuyumi.png').size(iconSize, iconSize),
+        toxic: draw.symbol().image('icons/toxic.png').size(iconSize, iconSize),
       };
 
       // Draw tiles
@@ -235,7 +230,7 @@
                 weight: 'bold',
               });
 
-              text.move(x + hex.width()/2 - text.length()/2 + canvasWidth/2, y + hex.height()/2 - 9 + canvasHeight/2);
+              text.move(x + hex.width()/2 - text.length()/2, y + hex.height()/2 - 9);
           }
       });
 
@@ -243,6 +238,12 @@
       const bbox = draw.bbox();
       draw.viewbox(bbox);
 
+      gridContainer.style.width = '100%';
+      if (gridContainer.offsetWidth > bbox.width) {
+        gridContainer.style.width = `${Math.ceil(bbox.width)}px`;
+      }
+
+      // Aux functions
       function getFillColor(type) {
         const colors = {
           blank: '#e0e0e0',
