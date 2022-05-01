@@ -31,7 +31,7 @@
           <label class="btn btn-outline-secondary btn-lg" for="players-6">6p</label>
         </div>
         <div class="col-md-6 mt-2 mb-2">
-          <h4>Chaos level</h4>
+          <h4>Scatter level</h4>
           <input type="radio" class="btn-check" name="chaos" id="chaos-1" autocomplete="off" value="1">
           <label class="btn btn-outline-secondary btn-lg" for="chaos-1">None</label>
 
@@ -89,10 +89,13 @@
       // Extend board randomly
       let tilesUsed = 0;
       const availableTiles = getAvailableTiles();
+      shuffleArray(availableTiles);
 
       while(tilesUsed < tileCount) {
         for (let r = 2; r <= 8; r++){
-          ring(r).forEach(tile => {
+          const newRing = ring(r);
+          shuffleArray(newRing);
+          newRing.forEach(tile => {
             if (tilesUsed < tileCount && isContiguous(tile, tiles) && Math.random() < tileProbability){
               tilesUsed++;
               const properties = availableTiles.pop();
@@ -281,8 +284,7 @@
       addTile(1, 'mountain', [0], null, 20);
       addTile(1, 'mountain', [0,3], null, 20);
       addTile(4, 'riverlands', [0,3]);
-
-      shuffleArray(tiles);
+      
       return tiles;
       
       function addTile(qty, type, blockades, icon = null, conquestValue = 0){
