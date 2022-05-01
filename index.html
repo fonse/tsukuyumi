@@ -13,7 +13,7 @@
   <main class="container">
     <form action="#" id="controls">
       <div class="row">
-        <div class="col-md-6 mt-2 mb-2">
+        <div class="col-md-6 mt-2">
           <h4>Number of players</h4>
           <input type="radio" class="btn-check" name="tiles" id="players-2" autocomplete="off" value="10">
           <label class="btn btn-outline-secondary btn-lg" for="players-2">2p</label>
@@ -30,7 +30,7 @@
           <input type="radio" class="btn-check" name="tiles" id="players-6" autocomplete="off" value="42">
           <label class="btn btn-outline-secondary btn-lg" for="players-6">6p</label>
         </div>
-        <div class="col-md-6 mt-2 mb-2">
+        <div class="col-md-6 mt-2">
           <h4>Scatter level</h4>
           <input type="radio" class="btn-check" name="chaos" id="chaos-1" autocomplete="off" value="1">
           <label class="btn btn-outline-secondary btn-lg" for="chaos-1">None</label>
@@ -44,13 +44,13 @@
           <input type="radio" class="btn-check" name="chaos" id="chaos-4" autocomplete="off" value="0.3">
           <label class="btn btn-outline-secondary btn-lg" for="chaos-4">High</label>
         </div>
-        <div class="col-md-6 mt-2 mb-2">
+        <div class="d-grid d-md-block mt-3 mb-4">
           <button class="btn btn-primary btn-lg" type="submit">Generate</button>
         </div>
       </div>
     </form>
 
-    <div id="grid" style="height:1000px; width:100%"></div>
+    <div id="grid" class="row"></div>
   </main>
 
   <script src="honeycomb.min.js"></script>
@@ -172,7 +172,9 @@
       const hexSize = 50;
 
       // Initialize canvas
-      document.getElementById('grid').innerHTML = '';
+      const gridContainer = document.getElementById('grid');
+      gridContainer.innerHTML = '';
+
       const draw = SVG().addTo('#grid').size('100%', '100%');
       const canvasWidth = draw.node.clientWidth;
       const canvasHeight = draw.node.clientHeight;
@@ -236,6 +238,10 @@
               text.move(x + hex.width()/2 - text.length()/2 + canvasWidth/2, y + hex.height()/2 - 9 + canvasHeight/2);
           }
       });
+
+      // Resize grid container
+      const bbox = draw.bbox();
+      draw.viewbox(bbox);
 
       function getFillColor(type) {
         const colors = {
