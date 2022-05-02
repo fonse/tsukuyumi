@@ -11,40 +11,44 @@
 <body>
   
   <main class="container">
-    <form action="#" id="controls">
-      <div class="row">
-        <div class="col-md-6 mt-2">
-          <h4>Number of players</h4>
+    <form action="#" id="controls" class="row align-items-end mb-4 mb-md-5">
+      <div class="col-md-5 mt-2">
+        <h4>Number of players</h4>
+        <div class="d-flex">
           <input type="radio" class="btn-check" name="tiles" id="players-2" autocomplete="off" value="10">
-          <label class="btn btn-outline-secondary btn-lg" for="players-2">2p</label>
-
+          <label class="btn btn-outline-secondary btn-lg flex-fill me-1" for="players-2">2p</label>
+  
           <input type="radio" class="btn-check" name="tiles" id="players-3" autocomplete="off" value="21">
-          <label class="btn btn-outline-secondary btn-lg" for="players-3">3p</label>
-
+          <label class="btn btn-outline-secondary btn-lg flex-fill me-1" for="players-3">3p</label>
+  
           <input type="radio" class="btn-check" name="tiles" id="players-4" autocomplete="off" value="28" checked>
-          <label class="btn btn-outline-secondary btn-lg" for="players-4">4p</label>
-
+          <label class="btn btn-outline-secondary btn-lg flex-fill me-1" for="players-4">4p</label>
+  
           <input type="radio" class="btn-check" name="tiles" id="players-5" autocomplete="off" value="35">
-          <label class="btn btn-outline-secondary btn-lg" for="players-5">5p</label>
-
+          <label class="btn btn-outline-secondary btn-lg flex-fill me-1" for="players-5">5p</label>
+  
           <input type="radio" class="btn-check" name="tiles" id="players-6" autocomplete="off" value="42">
-          <label class="btn btn-outline-secondary btn-lg" for="players-6">6p</label>
+          <label class="btn btn-outline-secondary btn-lg flex-fill" for="players-6">6p</label>
         </div>
-        <div class="col-md-6 mt-2">
-          <h4>Scatter level</h4>
+      </div>
+      <div class="col-md-5 mt-2">
+        <h4>Scatter level</h4>
+        <div class="d-flex">
           <input type="radio" class="btn-check" name="chaos" id="chaos-1" autocomplete="off" value="1">
-          <label class="btn btn-outline-secondary btn-lg" for="chaos-1">None</label>
+          <label class="btn btn-outline-secondary btn-lg flex-fill me-1" for="chaos-1">None</label>
 
           <input type="radio" class="btn-check" name="chaos" id="chaos-2" autocomplete="off" value="0.8" checked>
-          <label class="btn btn-outline-secondary btn-lg" for="chaos-2">Low</label>
+          <label class="btn btn-outline-secondary btn-lg flex-fill me-1" for="chaos-2">Low</label>
 
           <input type="radio" class="btn-check" name="chaos" id="chaos-3" autocomplete="off" value="0.6">
-          <label class="btn btn-outline-secondary btn-lg" for="chaos-3">Mid</label>
+          <label class="btn btn-outline-secondary btn-lg flex-fill me-1" for="chaos-3">Mid</label>
 
           <input type="radio" class="btn-check" name="chaos" id="chaos-4" autocomplete="off" value="0.3">
-          <label class="btn btn-outline-secondary btn-lg" for="chaos-4">High</label>
+          <label class="btn btn-outline-secondary btn-lg flex-fill" for="chaos-4">High</label>
         </div>
-        <div class="d-grid d-md-block mt-3 mb-4">
+      </div>
+      <div class="col-md-2 mt-3">
+        <div class="d-grid">
           <button class="btn btn-primary btn-lg" type="submit">Generate</button>
         </div>
       </div>
