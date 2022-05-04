@@ -43,7 +43,7 @@
           <input type="radio" class="btn-check" name="chaos" id="chaos-3" autocomplete="off" value="0.6">
           <label class="btn btn-outline-secondary btn-lg flex-fill me-1" for="chaos-3">Mid</label>
 
-          <input type="radio" class="btn-check" name="chaos" id="chaos-4" autocomplete="off" value="0.3">
+          <input type="radio" class="btn-check" name="chaos" id="chaos-4" autocomplete="off" value="0.25">
           <label class="btn btn-outline-secondary btn-lg flex-fill" for="chaos-4">High</label>
         </div>
       </div>
@@ -96,11 +96,11 @@
       shuffleArray(availableTiles);
 
       while(tilesUsed < tileCount) {
-        for (let r = 2; r <= 8; r++){
+        for (let r = 2; r <= 12; r++){
           const newRing = ring(r);
           shuffleArray(newRing);
           newRing.forEach(tile => {
-            if (tilesUsed < tileCount && isContiguous(tile, tiles) && Math.random() < tileProbability){
+            if (tilesUsed < tileCount && !tileListContains(tile, tiles) && isContiguous(tile, tiles) && Math.random() < tileProbability){
               tilesUsed++;
               const properties = availableTiles.pop();
   
@@ -140,7 +140,7 @@
 
     // Is the tile contiguous to the board?
     function isContiguous(tile, tileList) {
-      return neighbors(tile).filter(neighbor => tileList.filter(x => tileEquals(x, neighbor)).length > 0).length > 0;
+      return neighbors(tile).some(neighbor => tileListContains(neighbor, tileList));
     }
 
     // Get the set of neighbor coordinates for a tile
@@ -153,6 +153,11 @@
         shift(tile, -1,  0,  1),
         shift(tile,  1,  0, -1),
       ];
+    }
+
+    // Is the tile contained in the tile list?
+    function tileListContains(tile, tileList) {
+      return tileList.filter(x => tileEquals(x, tile)).length > 0;
     }
 
     // Shift the coordinates of a tile
