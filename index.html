@@ -34,17 +34,17 @@
       <div class="col-md-5 mt-2">
         <h4>Scatter level</h4>
         <div class="d-flex">
-          <input type="radio" class="btn-check" name="chaos" id="chaos-1" autocomplete="off" value="1">
-          <label class="btn btn-outline-secondary btn-lg flex-fill me-1" for="chaos-1">None</label>
+          <input type="radio" class="btn-check" name="scatter" id="scatter-1" autocomplete="off" value="1-1">
+          <label class="btn btn-outline-secondary btn-lg flex-fill me-1" for="scatter-1">None</label>
 
-          <input type="radio" class="btn-check" name="chaos" id="chaos-2" autocomplete="off" value="0.8" checked>
-          <label class="btn btn-outline-secondary btn-lg flex-fill me-1" for="chaos-2">Low</label>
+          <input type="radio" class="btn-check" name="scatter" id="scatter-2" autocomplete="off" value="0.75-2" checked>
+          <label class="btn btn-outline-secondary btn-lg flex-fill me-1" for="scatter-2">Low</label>
 
-          <input type="radio" class="btn-check" name="chaos" id="chaos-3" autocomplete="off" value="0.6">
-          <label class="btn btn-outline-secondary btn-lg flex-fill me-1" for="chaos-3">Mid</label>
+          <input type="radio" class="btn-check" name="scatter" id="scatter-3" autocomplete="off" value="0.75-1">
+          <label class="btn btn-outline-secondary btn-lg flex-fill me-1" for="scatter-3">Mid</label>
 
-          <input type="radio" class="btn-check" name="chaos" id="chaos-4" autocomplete="off" value="0.25">
-          <label class="btn btn-outline-secondary btn-lg flex-fill" for="chaos-4">High</label>
+          <input type="radio" class="btn-check" name="scatter" id="scatter-4" autocomplete="off" value="0.25-1">
+          <label class="btn btn-outline-secondary btn-lg flex-fill" for="scatter-4">High</label>
         </div>
       </div>
       <div class="col-md-2 mt-3">
@@ -73,8 +73,10 @@
       // Get params from form
       const formData = new FormData(form);
 
+      const scatterValues = formData.get('scatter').split('-');
       const tileCount = formData.get('tiles');
-      const tileProbability = formData.get('chaos');
+      const tileProbability = scatterValues[0];
+      const adjancencyRequirement = scatterValues[1];
 
       // Initialize board with moon tiles
       const tiles = [{
@@ -100,7 +102,7 @@
           const newRing = ring(r);
           shuffleArray(newRing);
           newRing.forEach(tile => {
-            if (tilesUsed < tileCount && !tileListContains(tile, tiles) && isContiguous(tile, tiles) && Math.random() < tileProbability){
+            if (tilesUsed < tileCount && !tileListContains(tile, tiles) && isAdjacent(tile, tiles, adjancencyRequirement) && Math.random() < tileProbability){
               tilesUsed++;
               const properties = availableTiles.pop();
   
@@ -139,8 +141,8 @@
     }
 
     // Is the tile contiguous to the board?
-    function isContiguous(tile, tileList) {
-      return neighbors(tile).some(neighbor => tileListContains(neighbor, tileList));
+    function isAdjacent(tile, tileList, adjancencyRequirement) {
+      return neighbors(tile).filter(neighbor => tileListContains(neighbor, tileList)).length >= adjancencyRequirement;
     }
 
     // Get the set of neighbor coordinates for a tile
