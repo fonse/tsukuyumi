@@ -79,6 +79,8 @@
       const tileProbability = params.tileProbability;
       const adjancencyRequirement = params.adjancencyRequirement;
       const allowHoles = params.allowHoles;
+      const oni = getAvailableOni();
+      shuffleArray(oni);
 
       // Initialize board with moon tiles
       const tiles = [{
@@ -90,6 +92,7 @@
 
       tiles.push(...ring(1).map(tile => {
         tile.type = 'moon';
+        tile.text = oni.pop();
 
         return tile;
       }));
@@ -117,7 +120,7 @@
               tile.type = properties.type;
               tile.blockades = properties.blockades;
               tile.icon = properties.icon;
-              tile.conquestValue = properties.conquestValue;
+              tile.text = properties.text;
               tiles.push(tile);
             }
           })
@@ -248,8 +251,8 @@
             draw.use(icons[hex.icon]).translate(x + hex.width()/2 - iconSize/2, y + hex.height()/2 - iconSize/2);
           }
 
-          if (hex.conquestValue) {
-            const text = draw.text(hex.conquestValue)
+          if (hex.text) {
+            const text = draw.text(hex.text)
               .font({
                 family: 'Helvetica',
                 size: 20,
@@ -320,16 +323,26 @@
       
       return tiles;
       
-      function addTile(qty, type, blockades, icon = null, conquestValue = 0){
+      function addTile(qty, type, blockades, icon = null, text = 0){
         for (let i = 0; i < qty; i++){
           tiles.push({
             type: type,
             blockades: blockades,
             icon: icon,
-            conquestValue: conquestValue,
+            text: text,
           });
         }
       }
+    }
+
+    function getAvailableOni() {
+      const oni = [];
+
+      Array(17).fill().forEach(i => oni.push('S'));
+      Array(12).fill().forEach(i => oni.push('M'));
+      Array(7).fill().forEach(i => oni.push('L'));
+
+      return oni;
     }
 
     function shuffleArray(array) {
