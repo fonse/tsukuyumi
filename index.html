@@ -79,9 +79,7 @@
       const tileProbability = params.tileProbability;
       const adjancencyRequirement = params.adjancencyRequirement;
       const allowHoles = params.allowHoles;
-      const oni = getAvailableOni();
-      shuffleArray(oni);
-
+      
       // Initialize board with moon tiles
       const tiles = [{
         q: 0,
@@ -89,7 +87,10 @@
         s: 0,
         type: 'moon',
       }];
-
+      
+      const oni = getAvailableOni();
+      shuffleArray(oni);
+      
       tiles.push(...ring(1).map(tile => {
         tile.type = 'moon';
         tile.text = oni.pop();
@@ -156,12 +157,45 @@
       return neighbors(tile).filter(neighbor => tileListContains(neighbor, tileList)).length >= adjancencyRequirement;
     }
 
-    // Does addong this tile to the board create a hole?
+    // Does adding this tile to the board create a hole?
     function createsHole(tile, tileList) {
-      return neighbors(tile).some(potentialHole =>
-        !tileListContains(potentialHole, tileList) && neighbors(potentialHole).filter(neighbor => tileListContains(neighbor, tileList)).length == 5
-      );
+      return neighbors(tile).some(potentialHole => {
+        // Not a hole if already on the board
+        if (tileListContains(potentialHole, tileList)) {
+          return false;
+        }
+
+        // Start a flood fill from the potential hole
+        const visited = [potentialHole];
+        const fringes = [ [potentialHole] ];
+        const maxReach = 10;
+
+        for (let i = 1; i <= maxReach; i++){
+          const oldVisitedCount = visited.length;
+          fringes.push([]);
+
+          for (let j = 0; j < fringes[i-1].length; j++){
+            neighbors(fringes[i-1][j]).forEach(neighbor => {
+              if (!tileListContains(neighbor, visited) && !(tileListContains(neighbor, tileList) || tileEquals(neighbor, tile)) ) {
+                visited.push(neighbor);
+                fringes[i].push(neighbor);
+              }
+            });
+          }
+
+          if (visited.length > 15) {
+            // Managed to paint 15 tiles, not a hole
+            return false;
+          }
+
+          if (visited.length == oldVisitedCount) {
+            // Ran into walls on all fronts, which means this was a hole
+            return true;
+          }
+        }
+      });
     }
+
 
     // Get the set of neighbor coordinates for a tile
     function neighbors(tile) {
