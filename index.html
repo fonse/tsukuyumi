@@ -81,15 +81,16 @@
       const allowHoles = params.allowHoles;
       
       // Initialize board with moon tiles
+      const oni = getAvailableOni();
+      shuffleArray(oni);
+
       const tiles = [{
         q: 0,
         r: 0,
         s: 0,
         type: 'moon',
+        text: oni.pop(),
       }];
-      
-      const oni = getAvailableOni();
-      shuffleArray(oni);
       
       tiles.push(...ring(1).map(tile => {
         tile.type = 'moon';
@@ -372,9 +373,9 @@
     function getAvailableOni() {
       const oni = [];
 
-      Array(17).fill().forEach(i => oni.push('S'));
-      Array(12).fill().forEach(i => oni.push('M'));
-      Array(7).fill().forEach(i => oni.push('L'));
+      Array(6).fill().forEach(i => oni.push('S'));
+      Array(6).fill().forEach(i => oni.push('M'));
+      Array(3).fill().forEach(i => oni.push('L'));
 
       return oni;
     }
