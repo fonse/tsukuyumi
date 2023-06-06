@@ -15,36 +15,36 @@
       <div class="col-md-5 mt-2">
         <h4>Number of players</h4>
         <div class="d-flex">
-          <input type="radio" class="btn-check" name="tiles" id="players-2" autocomplete="off" value="10">
+          <input type="radio" class="btn-check" name="tiles" id="players-2" autocomplete="off" value='{"tiles": 10, "requiredTiles": {"blank": 2, "mountain": 2, "fertile": 2}}'>
           <label class="btn btn-outline-secondary btn-lg flex-fill me-1" for="players-2">2p</label>
   
-          <input type="radio" class="btn-check" name="tiles" id="players-3" autocomplete="off" value="21">
+          <input type="radio" class="btn-check" name="tiles" id="players-3" autocomplete="off" value='{"tiles": 21, "requiredTiles": {}}'>
           <label class="btn btn-outline-secondary btn-lg flex-fill me-1" for="players-3">3p</label>
   
-          <input type="radio" class="btn-check" name="tiles" id="players-4" autocomplete="off" value="28" checked>
+          <input type="radio" class="btn-check" name="tiles" id="players-4" autocomplete="off" value='{"tiles": 28, "requiredTiles": {}}' checked>
           <label class="btn btn-outline-secondary btn-lg flex-fill me-1" for="players-4">4p</label>
   
-          <input type="radio" class="btn-check" name="tiles" id="players-5" autocomplete="off" value="35">
+          <input type="radio" class="btn-check" name="tiles" id="players-5" autocomplete="off" value='{"tiles": 35, "requiredTiles": {}}'>
           <label class="btn btn-outline-secondary btn-lg flex-fill me-1" for="players-5">5p</label>
   
-          <input type="radio" class="btn-check" name="tiles" id="players-6" autocomplete="off" value="42">
+          <input type="radio" class="btn-check" name="tiles" id="players-6" autocomplete="off" value='{"tiles": 42, "requiredTiles": {}}'>
           <label class="btn btn-outline-secondary btn-lg flex-fill" for="players-6">6p</label>
         </div>
       </div>
       <div class="col-md-5 mt-2">
         <h4>Scatter level</h4>
         <div class="d-flex">
-          <input type="radio" class="btn-check" name="params" id="params-1" autocomplete="off" value='{"tileProbability": 1, "adjancencyRequirement": 1, "allowHoles": false}'>
-          <label class="btn btn-outline-secondary btn-lg flex-fill me-1" for="params-1">None</label>
+          <input type="radio" class="btn-check" name="scatter" id="scatter-1" autocomplete="off" value='{"tileProbability": 1, "adjancencyRequirement": 1, "allowHoles": false}'>
+          <label class="btn btn-outline-secondary btn-lg flex-fill me-1" for="scatter-1">None</label>
 
-          <input type="radio" class="btn-check" name="params" id="params-2" autocomplete="off" value='{"tileProbability": 0.75, "adjancencyRequirement": 2, "allowHoles": false}' checked>
-          <label class="btn btn-outline-secondary btn-lg flex-fill me-1" for="params-2">Low</label>
+          <input type="radio" class="btn-check" name="scatter" id="scatter-2" autocomplete="off" value='{"tileProbability": 0.75, "adjancencyRequirement": 2, "allowHoles": false}' checked>
+          <label class="btn btn-outline-secondary btn-lg flex-fill me-1" for="scatter-2">Low</label>
 
-          <input type="radio" class="btn-check" name="params" id="params-3" autocomplete="off" value='{"tileProbability": 0.75, "adjancencyRequirement": 1, "allowHoles": false}'>
-          <label class="btn btn-outline-secondary btn-lg flex-fill me-1" for="params-3">Mid</label>
+          <input type="radio" class="btn-check" name="scatter" id="scatter-3" autocomplete="off" value='{"tileProbability": 0.75, "adjancencyRequirement": 1, "allowHoles": false}'>
+          <label class="btn btn-outline-secondary btn-lg flex-fill me-1" for="scatter-3">Mid</label>
 
-          <input type="radio" class="btn-check" name="params" id="params-4" autocomplete="off" value='{"tileProbability": 0.5, "adjancencyRequirement": 1, "allowHoles": true}'>
-          <label class="btn btn-outline-secondary btn-lg flex-fill" for="params-4">High</label>
+          <input type="radio" class="btn-check" name="scatter" id="scatter-4" autocomplete="off" value='{"tileProbability": 0.5, "adjancencyRequirement": 1, "allowHoles": true}'>
+          <label class="btn btn-outline-secondary btn-lg flex-fill" for="scatter-4">High</label>
         </div>
       </div>
       <div class="col-md-2 mt-3">
@@ -72,18 +72,18 @@
     function generateGrid() {
       // Get params from form
       const formData = new FormData(form);
+      const tilesParams = JSON.parse(formData.get('tiles'));
+      const scatterParams = JSON.parse(formData.get('scatter'));
 
-      const tileCount = formData.get('tiles');
-      const params = JSON.parse(formData.get('params'));
+      const tileCount = tilesParams.tiles;
+      const requiredTiles = tilesParams.requiredTiles;
 
-      const tileProbability = params.tileProbability;
-      const adjancencyRequirement = params.adjancencyRequirement;
-      const allowHoles = params.allowHoles;
+      const tileProbability = scatterParams.tileProbability;
+      const adjancencyRequirement = scatterParams.adjancencyRequirement;
+      const allowHoles = scatterParams.allowHoles;
       
       // Initialize board with moon tiles
       const oni = getAvailableOni();
-      shuffleArray(oni);
-
       const tiles = [{
         q: 0,
         r: 0,
@@ -99,11 +99,22 @@
         return tile;
       }));
 
-      // Extend board randomly
-      let tilesUsed = 0;
+      // Select tiles randomly
       const availableTiles = getAvailableTiles();
-      shuffleArray(availableTiles);
+      const selectedTiles = [];
 
+      for (type in requiredTiles) {
+        for (i = 0; i < requiredTiles[type]; i++) {
+          selectedTiles.push(pickFirstTileForType(availableTiles, type));
+        }
+      }
+
+      shuffleArray(availableTiles);
+      selectedTiles.push(...availableTiles.splice(0, tileCount - selectedTiles.length));
+      shuffleArray(selectedTiles);
+      
+      // Extend board randomly
+      tilesUsed = 0;
       while(tilesUsed < tileCount) {
         for (let r = 2; r <= 12; r++){
           const newRing = ring(r);
@@ -117,7 +128,7 @@
               Math.random() < tileProbability
             ){
               tilesUsed++;
-              const properties = availableTiles.pop();
+              const properties = selectedTiles.pop();
   
               tile.type = properties.type;
               tile.blockades = properties.blockades;
@@ -355,7 +366,8 @@
       addTile(1, 'mountain', [0], null, 20);
       addTile(1, 'mountain', [0,3], null, 20);
       addTile(4, 'riverlands', [0,3]);
-      
+
+      shuffleArray(tiles);
       return tiles;
       
       function addTile(qty, type, blockades, icon = null, text = 0){
@@ -370,6 +382,16 @@
       }
     }
 
+    function pickFirstTileForType(availableTiles, type) {
+      for (let i = 0; i < availableTiles.length; i++) {
+        if (availableTiles[i].type == type) {
+          const chosenTile = availableTiles.splice(i, 1);
+          
+          return chosenTile[0];
+        }
+      }
+    }
+
     function getAvailableOni() {
       const oni = [];
 
@@ -377,6 +399,7 @@
       Array(6).fill().forEach(i => oni.push('M'));
       Array(3).fill().forEach(i => oni.push('L'));
 
+      shuffleArray(oni);
       return oni;
     }
 
